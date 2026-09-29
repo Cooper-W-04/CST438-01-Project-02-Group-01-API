@@ -1,7 +1,7 @@
 # <API name> Proposal
 
-## 1. The pitch (one paragraph)
-What the API does, who uses it, and why a client app would need it.
+## 1. The pitch (one paragraph) SoCalender
+SoCalender will be an API that allows you to setup events by the day, and hours, and see when everyone in a group can attend an event
 
 ## 2. Resources
 | Resource | Key fields | Relationships |
