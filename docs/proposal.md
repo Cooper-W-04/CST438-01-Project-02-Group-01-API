@@ -45,6 +45,7 @@ These become your ADRs later.
 
 ## 6. Risks
 The two things most likely to go wrong, and what you will do first to find out.
+Login was warned as a massive stumbling point, so it will be done near the start and thoroughly researched before code starts.
 
 ## 7. Team and Sprint 1
 Who owns what in Sprint 1. Link your Project board and Sprint 1 milestone.
