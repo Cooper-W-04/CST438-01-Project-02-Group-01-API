@@ -1,7 +1,7 @@
 # <API name> Proposal
 
 ## 1. The pitch
-This API helps groups find a time when everyone is available for an event. Users can join a scheduling group, view the week in one-hour time slices, and mark the hours when they are available. The API calculates and exposes availability data so that a Kotlin Android client can display the times that work best for the group. Users authenticate through OAuth2, and administrators can manage users and groups.
+SoCalender helps groups find a time when everyone is available for an event. Users can join a scheduling group, view the week in one-hour time slices, and mark the hours when they are available. The API calculates and exposes availability data so that a Kotlin Android client can display the times that work best for the group. Through a 2d array of the hours of a week in military time with each cell populated by how many users are available. Users authenticate through OAuth2, and administrators can manage users and groups. As a stretch goal we will make a button that runs an algorithm to choose the best time to meet with the most people available according to the duration of an event.
 
 
 ## 2. Resources
