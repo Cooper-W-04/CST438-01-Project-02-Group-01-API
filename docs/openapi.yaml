@@ -212,6 +212,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
 
   /api/v1/users/me:
+    get:
+      tags:
     delete:
       tags: [Users]
       operationId: deleteMyAccount

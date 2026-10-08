@@ -5,8 +5,8 @@
 *.keystore
 *.jks
 google-services.json
-**/src/main/resources/application-local.*
-**/src/main/resources/application-secret*.*
+src/main/resources/application-local.*
+src/main/resources/application-secret*.*
 local.properties
 
 # ---------- Gradle / Maven ----------
