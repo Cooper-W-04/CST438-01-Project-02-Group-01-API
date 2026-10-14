@@ -12,6 +12,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
@@ -33,9 +34,22 @@ class UserController(private val userRepository: UserRepository, private val use
      */
     @GetMapping("api/v1/users")
     @PreAuthorize("hasAuthority('USER_ADMIN')")
-    fun getAllUsers(@AuthenticationPrincipal principal: CustomUserDetails) : ResponseEntity<List<UserDto>> {
+    fun getAllUsers() : ResponseEntity<List<UserDto>> {
         val userDtos = userRepository.findAll()
             .map { userMapper.toDto(it) }
         return ResponseEntity.ok(userDtos)
+    }
+
+    /**
+     * View one user by userID
+     */
+    @GetMapping("api/v1/users/{userId}")
+    @PreAuthorize("hasAuthority('USER_ADMIN')")
+    fun getUserById(@PathVariable userId: Long) : ResponseEntity<UserDto> {
+        val user = userRepository.findByIdOrNull(userId)?: throw ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "User profile not found"
+        )
+        return ResponseEntity.ok(userMapper.toDto(user))
     }
 }

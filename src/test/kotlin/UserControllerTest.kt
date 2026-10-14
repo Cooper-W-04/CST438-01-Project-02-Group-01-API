@@ -102,4 +102,39 @@ class UserControllerTest {
             .andExpect(jsonPath("$[2].id").value(3L))
             .andExpect(jsonPath("$[2].role").value("ROLE_ADMIN"))
     }
+
+    @Test
+    fun `Admins can view a user by Id` (){
+        val createdAt = LocalDateTime.now()
+        val mockUser = User(
+            id = 1L,
+            oauthProvider = null,
+            oauthSubject = null,
+            displayName = "Hi",
+            role = "ROLE_USER",
+            createdAt = createdAt
+        )
+        val mockAdmin = User(
+            id = 2L,
+            oauthProvider = null,
+            oauthSubject = null,
+            displayName = "Admin",
+            role = "ROLE_ADMIN",
+            createdAt = createdAt
+        )
+        val testPrincipal = CustomUserDetails(mockAdmin)
+
+        val userMapper = UserMapper()
+
+        `when`(userRepository.findById(1L))
+            .thenReturn(Optional.of(mockUser))
+
+        mockMvc.perform(
+            get("/api/v1/users/1")
+                .with(user(testPrincipal))
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.displayName").value("Hi"))
+    }
 }
