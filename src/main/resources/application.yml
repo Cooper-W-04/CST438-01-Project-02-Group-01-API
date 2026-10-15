@@ -9,9 +9,9 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      # Use 'validate' if our tables are already created in Supabase,
-      # or 'update' if you want Hibernate to help manage schema updates.
-      ddl-auto: validate
+      # WE USE 'validate' if our tables are already created in Supabase,
+      # OR 'update' if you want Hibernate to help manage schema updates.
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:

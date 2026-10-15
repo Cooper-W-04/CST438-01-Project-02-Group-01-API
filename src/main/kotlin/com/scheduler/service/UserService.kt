@@ -3,10 +3,10 @@
  */
 package com.scheduler.service
 
-import com.scheduler.repository.UsersRepository
+import com.scheduler.repository.UserRepository
 import org.springframework.stereotype.Service
 
 @Service
-class UsersService(private val usersRepository: UsersRepository) {
+class UserService(private val userRepository: UserRepository) {
     // Add business logic methods here
 }
