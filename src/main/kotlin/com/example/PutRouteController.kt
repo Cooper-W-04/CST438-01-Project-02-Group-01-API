@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
@@ -20,7 +21,7 @@ class PutRouteController(
         @PathVariable groupId: Long,
         @RequestBody group: Group,
     ){
-       val checker = putRouteService.updateGroup(groupId, group)
+       val checker = putRouteService.replaceGroup(groupId, group)
        
        if(checker){
           
@@ -35,9 +36,10 @@ class PutRouteController(
     fun replaceAvailability(
         @PathVariable groupId: Long,
         @RequestBody times: String,
+        @AuthenticationPrincipal principal: CustomUserDetails
     ){
         //Get user id through getOwnProfile to get the userID
-        val userId = getOwnProfile().id
+        val userId = principal.getId()
        val checker = putRouteService.replaceUserAvailability(groupId, userId, times)
        
        if(checker){
