@@ -36,17 +36,22 @@ class PutRouteService(
         //If anything exceeds the constraints 
         //throw a false and stop here before you add or delete anything
         for (time in formatTimes){
-            if(time.length != 5){
-                return false
+            try {
+                if(time.length != 5){
+                    return false
+                }
+                //check if the day below 0 or above seven
+                if(time[0].digitToInt() !in 0..7){
+                    return false
+                }
+                //check if either of the hours are below 0 or above 24
+                val start = (time[1].toString() + time[2]).toInt()
+                val end = (time[3].toString() + time[4]).toInt()
+                if(start !in 0..24 || end !in 0..24){
+                    return false
+                }
             }
-            //check if the day below 0 or above seven
-            if(time[0].code !in 0..7){
-                return false
-            }
-            //check if either of the hours are below 0 or above 24
-            val start = (time[1].toString() + time[2]).toInt()
-            val end = (time[3].toString() + time[4]).toInt()
-            if(start !in 0..24 || end !in 0..24){
+            catch (e: Exception){
                 return false
             }
         }
@@ -69,7 +74,7 @@ class PutRouteService(
         //Using timeSlot make Availability through the passed along group and userID
         for (time in formatTimes){
             //Check if it already exists when you have a get going for this
-            val timeSlot = TimeSlot( id = 0, time[0].code, 
+            val timeSlot = TimeSlot( id = 0, time[0].digitToInt(), 
                 (time[1].toString() + time[2]).toInt(), 
                 (time[3].toString() + time[4]).toInt())
             //In the future replace this with whatever thing we have for Post TimeSlot

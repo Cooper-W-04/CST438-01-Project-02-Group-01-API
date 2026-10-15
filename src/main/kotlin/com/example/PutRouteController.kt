@@ -37,15 +37,18 @@ class PutRouteController(
         @PathVariable groupId: Long,
         @RequestBody times: String,
         @AuthenticationPrincipal principal: CustomUserDetails
-    ){
+    ): ResponseEntity<Void> {
         //Get user id through getOwnProfile to get the userID
         val userId = principal.getId()
        val checker = putRouteService.replaceUserAvailability(groupId, userId, times)
        
        if(checker){
-          
+          return ResponseEntity.noContent().build()
        }else{
-          
+          throw ResponseStatusException(
+                HttpStatus.EXPECTATION_FAILED,
+                "Improper Formatting of Time Information"
+            )
        }
     }
 
