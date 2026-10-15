@@ -20,7 +20,13 @@ class PutRouteController(
         @PathVariable groupId: Long,
         @RequestBody group: Group,
     ){
+       val checker = putRouteService.updateGroup(groupId, group)
        
+       if(checker){
+          
+       }else{
+          
+       }
     }
     
 
@@ -28,9 +34,17 @@ class PutRouteController(
     @PutMapping("/api/v1/groups/{groupId}/availability/me")
     fun replaceAvailability(
         @PathVariable groupId: Long,
-        @RequestBody availabilities: Availability,
+        @RequestBody times: String,
     ){
+        //Get user id through getOwnProfile to get the userID
+        val userId = getOwnProfile().id
+       val checker = putRouteService.replaceUserAvailability(groupId, userId, times)
        
+       if(checker){
+          
+       }else{
+          
+       }
     }
 
 
