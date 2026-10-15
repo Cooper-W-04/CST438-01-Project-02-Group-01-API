@@ -9,9 +9,8 @@ class CustomUserDetails(val user: User) : UserDetails {
         return user.id
     }
 
-    //These functions aren't currently necessary so I have left them unimplemented initially
     override fun getAuthorities(): Collection<out GrantedAuthority> {
-        return listOf(SimpleGrantedAuthority(user.role))
+        return listOf(SimpleGrantedAuthority("USER_" + user.role))
     }
 
     override fun getPassword(): String? {
