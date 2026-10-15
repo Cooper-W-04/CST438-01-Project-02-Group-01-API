@@ -3,3 +3,5 @@
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
+
+rootProject.name = "CST438-01-Project-02-Group-01-API"
