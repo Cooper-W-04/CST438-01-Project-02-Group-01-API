@@ -9,6 +9,7 @@ class putRouteService(
 ) {
     fun replaceGroup(groupId: Long, group: Group): Boolean {
         //Replace the name with the name in the passed group
+        //Replace the groupMembers
         //Then call replaceGroupAvailability with availabilities
         
 
@@ -25,7 +26,8 @@ class putRouteService(
     }
     
     fun replaceUserAvailability(groupId: Long, userId: Long, times: String): Boolean {
-        //Check if the times string is good
+        val formatTimes = mutableListOf(String)
+        //Check if the times string is good and add them to a list
         //this format
         //DayStartEnd
         //Constraints
@@ -34,7 +36,17 @@ class putRouteService(
         //If anything exceeds the constraints 
         //throw a false and stop here before you add or delete anything
         
-        //Once verified delete all their availabilities, not TimeSlots since many can share a time slot
+        //Once verified delete all the users availabilities from that group
+        //Not TimeSlots since many can share a time slot
+        jdbcTemplate.update(
+            """
+            DELETE FROM availability
+            WHERE group_id = ?
+              AND user_id = ?
+            """.trimIndent(),
+            groupId,
+            userId
+        )
         
         //Add all the needed timeSlots if the needed TimeSlot exists already don't make a copy
         //Do that by getting all the time slots and converting them to the string format 
