@@ -1,32 +1,27 @@
 package com.scheduler.model
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 
-@Entity
-@Table(name = "users")
+@Table("users")
 data class User(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(name = "oauth_provider")
+    @Column("oauth_provider")
     val oauthProvider: String? = null,
 
-    @Column(name = "oauth_subject")
+    @Column("oauth_subject")
     val oauthSubject: String? = null,
 
-    @Column(name = "display_name", nullable = false)
+    @Column("display_name")
     val displayName: String,
 
-    @Column(name = "role", nullable = false)
+    @Column("role")
     val role: String,
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column("created_at")
     val createdAt: LocalDateTime = LocalDateTime.now()
 )

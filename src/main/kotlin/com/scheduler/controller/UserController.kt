@@ -5,7 +5,6 @@ package com.scheduler.controller
 
 import com.scheduler.dto.UserDto
 import com.scheduler.mapper.UserMapper
-import com.scheduler.model.User
 import com.scheduler.repository.UserRepository
 import com.scheduler.security.CustomUserDetails
 import org.springframework.data.repository.findByIdOrNull
@@ -27,7 +26,7 @@ class UserController(
     fun getOwnProfile(
         @AuthenticationPrincipal principal: CustomUserDetails
     ): ResponseEntity<UserDto> {
-        val userId: Long = principal.getId()
+        val userId = principal.getId()
 
         val user = userRepository.findByIdOrNull(userId)
             ?: throw ResponseStatusException(
