@@ -1,12 +1,6 @@
-package com.example.controller
+package com.scheduler.controller
 
-import com.example.CustomUserDetails
-import com.example.dto.GroupDto
-import org.springframework.http.ResponseEntity
-import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.bind.annotation.PathVariable
 
 @RestController
 class ScheduleGroupController {

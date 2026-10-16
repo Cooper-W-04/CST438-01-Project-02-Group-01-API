@@ -1,4 +1,4 @@
-package com.example.dto
+package com.scheduler.dto
 
 import java.time.LocalDateTime
 

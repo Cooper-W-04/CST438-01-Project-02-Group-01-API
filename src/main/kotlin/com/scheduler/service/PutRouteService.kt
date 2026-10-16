@@ -1,5 +1,7 @@
-package com.example
+package com.scheduler.service
 
+import com.scheduler.model.Group
+import com.scheduler.model.TimeSlot
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 
@@ -74,7 +76,7 @@ class PutRouteService(
         //Using timeSlot make Availability through the passed along group and userID
         for (time in formatTimes){
             //Check if it already exists when you have a get going for this
-            val timeSlot = TimeSlot( id = 0, time[0].digitToInt(), 
+            val timeSlot = TimeSlot( id = 0, time[0].digitToInt(),
                 (time[1].toString() + time[2]).toInt(), 
                 (time[3].toString() + time[4]).toInt())
             //In the future replace this with whatever thing we have for Post TimeSlot
@@ -83,9 +85,9 @@ class PutRouteService(
             INSERT INTO TIME_SLOT('day_of_the_week','start_hour','end_hour')
             VALUES(?,?,?)
             """.trimIndent(),
-            timeSlot.day_of_the_week,
-            timeSlot.start_hour,
-            timeSlot.end_hour
+            timeSlot.dayOfWeek,
+            timeSlot.startHour,
+            timeSlot.endHour
             )
             
             

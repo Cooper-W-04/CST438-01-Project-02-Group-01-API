@@ -1,11 +1,11 @@
-package com.example.`object`
+package com.scheduler.model
 
 import org.springframework.data.relational.core.mapping.Table
 
-@Table
-data class Timeslot (
+@Table("TIME_SLOT")
+data class TimeSlot(
     val id: Long,
     val dayOfWeek: Int,
     val startHour: Int,
-    val endHour: Int
+    val endHour: Int,
 )
