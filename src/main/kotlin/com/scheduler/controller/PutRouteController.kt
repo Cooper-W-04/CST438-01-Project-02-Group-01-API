@@ -1,5 +1,8 @@
-package com.example
+package com.scheduler.controller
 
+import com.scheduler.security.CustomUserDetails
+import com.scheduler.model.Group
+import com.scheduler.service.PutRouteService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal

@@ -36,7 +36,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
     testImplementation("org.springframework.boot:spring-boot-starter-security-test")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 }
 
 kotlin {

@@ -1,4 +1,4 @@
-package com.example
+package com.scheduler.model
 
 import org.springframework.data.relational.core.mapping.Table
 
