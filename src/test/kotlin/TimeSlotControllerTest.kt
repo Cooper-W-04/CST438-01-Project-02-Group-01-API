@@ -1,9 +1,9 @@
 package com.example
 
-import com.example.config.SecurityConfig
-import com.example.controller.TimeslotController
-import com.example.`object`.Timeslot
-import com.example.repository.TimeslotRepository
+import com.scheduler.config.SecurityConfig
+import com.scheduler.controller.TimeSlotController
+import com.scheduler.model.TimeSlot
+import com.scheduler.repository.TimeSlotRepository
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,25 +16,26 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@WebMvcTest(TimeslotController::class)
-//Importing security config is necessary for it to recognize that getting the user list
-//should be public
+@WebMvcTest(TimeSlotController::class)
+// Importing security config is necessary for it to recognize that getting the user list
+// should be public
 @Import(SecurityConfig::class)
-class TimeslotControllerTest {
+class TimeSlotControllerTest {
+
     @Autowired
     private lateinit var mockMvc: MockMvc
 
     @MockitoBean
-    private lateinit var timeslotRepository: TimeslotRepository
+    private lateinit var timeSlotRepository: TimeSlotRepository
 
-    //Mock data test just adds two timeslots and ensures that list works properly; The proper
-    //168 in the database would work according to the same logic.
+    // Mock data test just adds two timeslots and ensures that list works properly; the proper
+    // 168 in the database would work according to the same logic.
     @Test
-    fun `timeslot controller properly returns a list of all timeslots`(){
-        val mockTimeslot = Timeslot(1L, 1, 1, 2)
-        val mockTimeslot2 = Timeslot(2L, 2, 2, 3)
+    fun `timeslot controller properly returns a list of all timeslots`() {
+        val mockTimeslot = TimeSlot(1L, 1, 1, 2)
+        val mockTimeslot2 = TimeSlot(2L, 2, 2, 3)
 
-        `when`(timeslotRepository.findAll())
+        `when`(timeSlotRepository.findAll())
             .thenReturn(listOf(mockTimeslot, mockTimeslot2))
 
         mockMvc.perform(

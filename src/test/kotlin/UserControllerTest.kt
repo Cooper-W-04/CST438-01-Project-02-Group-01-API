@@ -1,9 +1,11 @@
 package com.example
 
-import com.example.controller.UserController
-import com.example.dto.UserDto
-import com.example.mapper.UserMapper
-import com.example.repository.UserRepository
+import com.scheduler.controller.UserController
+import com.scheduler.dto.UserDto
+import com.scheduler.mapper.UserMapper
+import com.scheduler.model.User
+import com.scheduler.repository.UserRepository
+import com.scheduler.security.CustomUserDetails
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
@@ -53,8 +55,8 @@ class UserControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$.displayName").value("Hi"))
-            .andExpect(jsonPath("\$.role").value("ROLE_USER"))
+            .andExpect(jsonPath("$.displayName").value("Hi"))
+            .andExpect(jsonPath("$.role").value("ROLE_USER"))
     }
 
     @Test
@@ -89,6 +91,7 @@ class UserControllerTest {
 
         `when`(userRepository.findAll())
             .thenReturn(listOf(mockUser1, mockUser2, mockAdmin))
+
         mockMvc.perform(
             get("/api/v1/users")
                 .with(user(testPrincipal))
@@ -135,6 +138,6 @@ class UserControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$.displayName").value("Hi"))
+            .andExpect(jsonPath("$.displayName").value("Hi"))
     }
 }

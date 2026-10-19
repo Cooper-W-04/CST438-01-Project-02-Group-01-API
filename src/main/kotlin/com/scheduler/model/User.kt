@@ -1,19 +1,27 @@
-/**
- * JPA Entity representing the 'public.users' table in the Supabase PostgreSQL database.
- */
 package com.scheduler.model
 
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
 
-@Entity
-@Table(name = "users")
+@Table("users")
 data class User(
     @Id
     val id: Long? = null,
-    val oauthProvider: String,
-    val oauthSubject: String,
+
+    @Column("oauth_provider")
+    val oauthProvider: String? = null,
+
+    @Column("oauth_subject")
+    val oauthSubject: String? = null,
+
+    @Column("display_name")
     val displayName: String,
-    val role: String
+
+    @Column("role")
+    val role: String,
+
+    @Column("created_at")
+    val createdAt: LocalDateTime = LocalDateTime.now()
 )

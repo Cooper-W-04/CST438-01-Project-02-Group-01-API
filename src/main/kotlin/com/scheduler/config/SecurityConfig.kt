@@ -1,25 +1,25 @@
-/**
- * Security configuration to permit public access to API endpoints during development and demo!
- */
 package com.scheduler.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.web.SecurityFilterChain
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 class SecurityConfig {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http
+        return http
             .csrf { it.disable() }
-            .authorizeHttpRequests { auth ->
-                auth.anyRequest().permitAll()
+            .authorizeHttpRequests {
+                it.requestMatchers("/api/v1/time-slots").permitAll()
+                it.anyRequest().authenticated()
             }
-        return http.build()
+            .build()
     }
 }
