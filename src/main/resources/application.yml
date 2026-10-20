@@ -1,5 +1,6 @@
 # Database configuration is supplied through environment variables.
 # Do not put Supabase credentials directly in this file.
+# I really mean it. If i see real credentials here, I will no longer work on this project.
 
 spring:
   datasource:
