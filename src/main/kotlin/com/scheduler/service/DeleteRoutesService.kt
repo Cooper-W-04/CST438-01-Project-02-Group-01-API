@@ -43,4 +43,13 @@ class DeleteRoutesService(
 
         return rowsDeleted == 1
     }
+
+    fun deleteGroup(groupId: Long): Boolean {
+        val rowsDeleted = jdbcTemplate.update(
+            "DELETE FROM schedule_groups WHERE id = ?",
+            groupId
+        )
+
+        return rowsDeleted == 1
+    }
 }
