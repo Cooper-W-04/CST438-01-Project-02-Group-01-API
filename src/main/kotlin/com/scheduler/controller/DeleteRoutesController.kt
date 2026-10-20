@@ -69,4 +69,28 @@ class DeleteRoutesController(
 
         return ResponseEntity.noContent().build()
     }
+
+    @DeleteMapping("/api/v1/groups/{groupId}")
+    fun deleteGroup(
+        @PathVariable groupId: Long,
+        @AuthenticationPrincipal principal: CustomUserDetails
+    ): ResponseEntity<Void> {
+        if (!principal.user.role.equals("ADMIN", ignoreCase = true)) {
+            throw ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "Only administrators can delete groups"
+            )
+        }
+
+        val deleted = deleteRoutesService.deleteGroup(groupId)
+
+        if (!deleted) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Group not found"
+            )
+        }
+
+        return ResponseEntity.noContent().build()
+    }
 }

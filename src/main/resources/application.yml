@@ -1,18 +1,10 @@
-# Configuration file for Supabase PostgreSQL JDBC connection and Spring Boot JPA settings
+# Database configuration is supplied through environment variables.
+# Do not put Supabase credentials directly in this file.
+# I really mean it. If i see real credentials here, I will no longer work on this project.
+
 spring:
   datasource:
-    # Replace [YOUR-PROJECT-REF] with your actual Supabase project reference
-    url: jdbc:postgresql://db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
-    username: postgres
-    # Use your Supabase database password (found in Project Settings -> Database)
-    password: YOUR_SUPABASE_DB_PASSWORD
+    url: ${SUPABASE_DB_URL:${SPRING_DATASOURCE_URL}}
+    username: ${SUPABASE_DB_USERNAME:${SPRING_DATASOURCE_USERNAME:postgres}}
+    password: ${SUPABASE_DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD}}
     driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      # WE USE 'validate' if our tables are already created in Supabase,
-      # OR 'update' if you want Hibernate to help manage schema updates.
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
