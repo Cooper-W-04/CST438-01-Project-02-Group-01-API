@@ -19,17 +19,24 @@ class PutRouteController(
     //Do the routing for the two puts 
     
     //replace everything except the stuff done at the start like id, created_at, created_by
+    //And the stuff you're not allowed to touch since it's not yours
     @PutMapping("/api/v1/groups/{groupId}")
     fun replaceGroup(
         @PathVariable groupId: Long,
-        @RequestBody group: Group,
-    ){
-       val checker = putRouteService.replaceGroup(groupId, group)
+        @AuthenticationPrincipal principal: CustomUserDetails,
+        @RequestBody groupName: String,
+        @RequestBody times: String,
+    ): ResponseEntity<Void> {
+
+       val checker = putRouteService.replaceGroup(groupId, principal.getId(), groupName, times)
        
        if(checker){
-          
+          return ResponseEntity.noContent().build()
        }else{
-          
+          throw ResponseStatusException(
+                HttpStatus.EXPECTATION_FAILED,
+                "Improper Formatting of Time Information"
+            )
        }
     }
     

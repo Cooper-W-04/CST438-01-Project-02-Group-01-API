@@ -9,19 +9,24 @@ import org.springframework.stereotype.Service
 class PutRouteService(
     private val jdbcTemplate: JdbcTemplate
 ) {
-    fun replaceGroup(groupId: Long, group: Group): Boolean {
-        //Replace the name with the name in the passed group
-        //Replace the groupMembers
-        //Then call replaceGroupAvailability with availabilities
+    fun replaceGroup(groupId: Long, userId: Long, groupName: String, times: String): Boolean {
+        //Replace the name with the new given name
+        jdbcTemplate.update(
+            """
+            FROM group
+            WHERE group_id = ?
+            SET event_name = ?
+            """.trimIndent(),
+            groupId, groupName
+
+        )
         
-
-        return true
-    }
-
-    fun replaceGroupAvailability(groupId: Long, timeSlot: TimeSlot): Boolean {
-        //Get all the users from group
-        //Then for each user get the corresponeding information
-        //Pass it to replaceUserAvailability
+        //Then you can replace your own availability or remove yourself but not remove others
+        try {
+            replaceUserAvailability(groupId, userId,times)
+        }catch (e: Exception){
+            return false
+        }
         
 
         return true
@@ -76,7 +81,8 @@ class PutRouteService(
         //Using timeSlot make Availability through the passed along group and userID
         for (time in formatTimes){
             //Check if it already exists when you have a get going for this
-            val timeSlot = TimeSlot( id = 0, time[0].digitToInt(),
+            
+            val timeSlot = TimeSlot(id = 0, time[0].digitToInt(),
                 (time[1].toString() + time[2]).toInt(), 
                 (time[3].toString() + time[4]).toInt())
             //In the future replace this with whatever thing we have for Post TimeSlot
@@ -90,7 +96,7 @@ class PutRouteService(
             timeSlot.endHour
             )
             
-            
+            //Get the proper time_slot_id
             jdbcTemplate.update(
             """
             INSERT INTO AVAILABILITY('user_id','group_id','time_slot_id')
