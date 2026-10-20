@@ -18,7 +18,10 @@ class AlreadyMemberException : RuntimeException()
 class PostRoutesService(
     private val jdbcTemplate: JdbcTemplate
 ) {
-    fun createGroup(eventName: String, userId: Long): GroupResponse {
+    fun createGroup(
+        eventName: String,
+        userId: Long
+    ): GroupResponse {
         if (eventName.isBlank()) {
             throw IllegalArgumentException("Event name cannot be blank")
         }
@@ -45,8 +48,11 @@ class PostRoutesService(
             keyHolder
         )
 
-        val groupId = keyHolder.key?.toLong()
-            ?: throw IllegalStateException("Created group did not receive an ID")
+        val groupId =
+            (keyHolder.keyList.firstOrNull()?.get("id") as? Number)?.toLong()
+                ?: throw IllegalStateException(
+                    "Created group did not receive an ID"
+                )
 
         return jdbcTemplate.queryForObject(
             """
@@ -66,7 +72,9 @@ class PostRoutesService(
                 )
             },
             groupId
-        ) ?: throw IllegalStateException("Created group could not be retrieved")
+        ) ?: throw IllegalStateException(
+            "Created group could not be retrieved"
+        )
     }
 
     fun joinGroup(
@@ -103,8 +111,11 @@ class PostRoutesService(
             keyHolder
         )
 
-        val membershipId = keyHolder.key?.toLong()
-            ?: throw IllegalStateException("Created membership did not receive an ID")
+        val membershipId =
+            (keyHolder.keyList.firstOrNull()?.get("id") as? Number)?.toLong()
+                ?: throw IllegalStateException(
+                    "Created membership did not receive an ID"
+                )
 
         return jdbcTemplate.queryForObject(
             """
