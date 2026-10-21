@@ -34,8 +34,8 @@ class PutRouteController(
           return ResponseEntity.noContent().build()
        }else{
           throw ResponseStatusException(
-                HttpStatus.EXPECTATION_FAILED,
-                "Improper Formatting of Time Information"
+                HttpStatus.BAD_REQUEST,
+                "Missing Information"
             )
        }
     }
@@ -45,12 +45,12 @@ class PutRouteController(
     @PutMapping("/api/v1/groups/{groupId}/availability/me")
     fun replaceAvailability(
         @PathVariable groupId: Long,
+        @AuthenticationPrincipal principal: CustomUserDetails,
         @RequestBody times: String,
-        @AuthenticationPrincipal principal: CustomUserDetails
     ): ResponseEntity<Void> {
         //Get user id through getOwnProfile to get the userID
         val userId = principal.getId()
-       val checker = putRouteService.replaceUserAvailability(groupId, userId, times)
+        val checker = putRouteService.replaceUserAvailability(groupId, userId, times)
        
        if(checker){
           return ResponseEntity.noContent().build()
