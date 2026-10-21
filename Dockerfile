@@ -12,7 +12,12 @@ COPY build.gradle.kts settings.gradle.kts ./
 COPY src src
 
 # Build the executable Spring Boot fat JAR and copy the fat JAR (excluding plain jar) to /app/app.jar
-RUN ./gradlew bootJar --no-daemon && find build/libs/ -name "*.jar" ! -name "*-plain.jar" -exec cp {} /app/app.jar \;
+RUN sed -i 's/\r$//' gradlew \
+    && chmod +x gradlew \
+    && ./gradlew bootJar --no-daemon \
+    && find build/libs/ -name "*.jar" \
+       ! -name "*-plain.jar" \
+       -exec cp {} /app/app.jar \;
 
 # Stage 2: Runtime image
 FROM eclipse-temurin:17-jre-jammy
