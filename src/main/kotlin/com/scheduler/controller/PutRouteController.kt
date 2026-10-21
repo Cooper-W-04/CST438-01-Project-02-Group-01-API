@@ -1,5 +1,6 @@
 package com.scheduler.controller
 
+import com.scheduler.dto.PutGroupRequest
 import com.scheduler.security.CustomUserDetails
 import com.scheduler.model.Group
 import com.scheduler.service.PutRouteService
@@ -24,11 +25,10 @@ class PutRouteController(
     fun replaceGroup(
         @PathVariable groupId: Long,
         @AuthenticationPrincipal principal: CustomUserDetails,
-        @RequestBody groupName: String,
-        @RequestBody times: String,
+        @RequestBody groupRequest: PutGroupRequest,
     ): ResponseEntity<Void> {
 
-       val checker = putRouteService.replaceGroup(groupId, principal.getId(), groupName, times)
+       val checker = putRouteService.replaceGroup(groupId, principal.getId(), groupRequest.groupName, groupRequest.times)
        
        if(checker){
           return ResponseEntity.noContent().build()

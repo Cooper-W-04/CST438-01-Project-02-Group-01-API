@@ -16,7 +16,7 @@ class PutRouteService(
         //Replace the name with the new given name
         val groups = jdbcTemplate.update(
             """
-            UPDATE group
+            UPDATE schedule_groups
             SET event_name = ?
             WHERE group_id = ?
             """.trimIndent(),
@@ -66,6 +66,9 @@ class PutRouteService(
                 if(start !in 0..24 || end !in 0..24){
                     return false
                 }
+                if(start >= end){
+                    return false
+                }
             }
             catch (e: Exception){
                 return false
@@ -98,7 +101,7 @@ class PutRouteService(
                 //Insert the new timeSlot
                 jdbcTemplate.update({connection -> connection.prepareStatement(
                     """
-                    INSERT INTO time_slots('day_of_the_week','start_hour','end_hour')
+                    INSERT INTO time_slots(day_of_the_week,start_hour,end_hour)
                     VALUES(?,?,?)
                     """.trimIndent(),
                     Statement.RETURN_GENERATED_KEYS
@@ -124,7 +127,7 @@ class PutRouteService(
             //Insert the new timeSlot
                 jdbcTemplate.update({connection -> connection.prepareStatement(
                     """
-                    INSERT INTO availability('user_id','group_id','time_slot_id')
+                    INSERT INTO availability(user_id,group_id,time_slot_id)
                     VALUES(?,?,?)
                     """.trimIndent(),
                     Statement.RETURN_GENERATED_KEYS
@@ -147,7 +150,7 @@ class PutRouteService(
             """
             SELECT EXISTS(
                 SELECT 1
-                FROM time_slot
+                FROM time_slots
                 WHERE start_hour = ?
                 AND end_hour = ?
                 AND day_of_the_week = ?
@@ -162,7 +165,7 @@ class PutRouteService(
         return jdbcTemplate.queryForObject(
             """
             SELECT id
-            FROM time_slot
+            FROM time_slots
             WHERE start_hour = ?
             AND end_hour = ?
             AND day_of_the_week = ?
