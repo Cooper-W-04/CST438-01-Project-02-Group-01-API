@@ -3,22 +3,28 @@ openapi: 3.0.3
 info:
   title: Availability Planner API
   version: 1.0.0
-  description: API for managing users, groups, and weekly availability.
+  description: API for managing users, groups, memberships, and weekly availability.
 
 servers:
   - url: http://localhost:8080
     description: Local development server
+  - url: https://cst438-01-project-02-group-01-api.onrender.com
+    description: Render deployment
 
 security:
   - bearerAuth: []
 
 tags:
   - name: Users
-    description: Operations for the signed-in user
+    description: User profile and administration operations
   - name: Groups
+    description: Schedule group operations
+  - name: Memberships
     description: Group membership operations
   - name: Availability
     description: User availability operations
+  - name: Time Slots
+    description: Standard weekly time slots
 
 paths:
   /api/v1/users/me:
@@ -44,29 +50,248 @@ paths:
       tags: [Users]
       operationId: deleteOwnAccount
       summary: Delete the signed-in user's account
-      description: Deletes the user's account and related records according to the database foreign-key rules.
       responses:
         '204':
-          description: Account deleted successfully. No response body.
+          description: Account deleted successfully.
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/users:
+    get:
+      tags: [Users]
+      operationId: getAllUsers
+      summary: Get all users
+      description: Requires administrator permission.
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/users/{userId}:
+    get:
+      tags: [Users]
+      operationId: getUserById
+      summary: Get a user by ID
+      description: Requires administrator permission.
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: The requested user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/time-slots:
+    get:
+      tags: [Time Slots]
+      operationId: getTimeSlots
+      summary: Get all standard weekly time slots
+      security: []
+      responses:
+        '200':
+          description: The standard weekly time slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimeSlot'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/groups:
+    post:
+      tags: [Groups]
+      operationId: createGroup
+      summary: Create a schedule group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupRequest'
+      responses:
+        '201':
+          description: The group was created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/groups/{groupId}:
+    patch:
+      tags: [Groups]
+      operationId: patchGroupEventName
+      summary: Partially update a group's event name
+      description: Only the group creator can update the event name.
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchGroupRequest'
+      responses:
+        '204':
+          description: The event name was updated successfully.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      tags: [Groups]
+      operationId: replaceGroup
+      summary: Replace a group's editable details
+      description: Defined by the current open PUT pull request.
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutGroupRequest'
+      responses:
+        '204':
+          description: The group was replaced successfully.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '417':
+          description: The availability information was formatted incorrectly.
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags: [Groups]
+      operationId: deleteGroup
+      summary: Delete a group
+      description: Requires administrator permission.
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+      responses:
+        '204':
+          description: The group was deleted successfully.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/groups/{groupId}/members:
+    post:
+      tags: [Memberships]
+      operationId: joinGroup
+      summary: Join a group
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+      responses:
+        '201':
+          description: The membership was created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupMembership'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalError'
 
   /api/v1/groups/{groupId}/members/me:
     delete:
-      tags: [Groups]
+      tags: [Memberships]
       operationId: leaveGroup
-      summary: Remove the signed-in user from a group
+      summary: Leave a group
       parameters:
         - $ref: '#/components/parameters/GroupId'
       responses:
         '204':
-          description: The signed-in user was removed from the group.
+          description: The signed-in user left the group.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/groups/{groupId}/availability/me:
+    put:
+      tags: [Availability]
+      operationId: replaceOwnAvailability
+      summary: Replace the signed-in user's availability
+      description: Replaces all availability selections for the signed-in user in the group.
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              description: Space-separated availability values in day/start/end format.
+              example: "10912 21318"
+          text/plain:
+            schema:
+              type: string
+              example: "10912 21318"
+      responses:
+        '204':
+          description: Availability replaced successfully.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '417':
+          description: The availability information was formatted incorrectly.
         '500':
           $ref: '#/components/responses/InternalError'
 
@@ -97,6 +322,16 @@ components:
       description: Bearer token for the authenticated user.
 
   parameters:
+    UserId:
+      name: userId
+      in: path
+      required: true
+      description: The user ID.
+      schema:
+        type: integer
+        format: int64
+        example: 7
+
     GroupId:
       name: groupId
       in: path
@@ -131,14 +366,6 @@ components:
           format: int64
           readOnly: true
           example: 7
-        oauthProvider:
-          type: string
-          nullable: true
-          example: google
-        oauthSubject:
-          type: string
-          nullable: true
-          example: google-user-subject
         displayName:
           type: string
           example: Cooper Westervelt
@@ -152,6 +379,121 @@ components:
           type: string
           format: date-time
           readOnly: true
+
+    CreateGroupRequest:
+      type: object
+      required:
+        - eventName
+      properties:
+        eventName:
+          type: string
+          minLength: 1
+          example: Team planning meeting
+
+    PatchGroupRequest:
+      type: object
+      required:
+        - eventName
+      properties:
+        eventName:
+          type: string
+          minLength: 1
+          example: Updated team planning meeting
+
+    PutGroupRequest:
+      type: object
+      required:
+        - groupName
+        - times
+      properties:
+        groupName:
+          type: string
+          minLength: 1
+          example: Team planning meeting
+        times:
+          type: string
+          description: Space-separated availability values for the group update.
+          example: "10912 21318"
+
+    Group:
+      type: object
+      required:
+        - id
+        - eventName
+        - createdBy
+        - createdAt
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+          example: 1
+        eventName:
+          type: string
+          example: Team planning meeting
+        createdBy:
+          type: integer
+          format: int64
+          example: 7
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    GroupMembership:
+      type: object
+      required:
+        - id
+        - groupId
+        - userId
+        - joinedAt
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+          example: 12
+        groupId:
+          type: integer
+          format: int64
+          example: 1
+        userId:
+          type: integer
+          format: int64
+          example: 7
+        joinedAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    TimeSlot:
+      type: object
+      required:
+        - id
+        - dayOfWeek
+        - startHour
+        - endHour
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+          example: 1
+        dayOfWeek:
+          type: integer
+          minimum: 1
+          maximum: 7
+          example: 1
+        startHour:
+          type: integer
+          minimum: 0
+          maximum: 23
+          example: 9
+        endHour:
+          type: integer
+          minimum: 1
+          maximum: 24
+          example: 10
 
     Problem:
       type: object
@@ -173,9 +515,16 @@ components:
           example: The requested record was not found.
         instance:
           type: string
-          example: /api/v1/availability/42
+          example: /api/v1/groups/42
 
   responses:
+    BadRequest:
+      description: The request was invalid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+
     Unauthorized:
       description: Missing or invalid authentication.
       content:
@@ -183,8 +532,22 @@ components:
           schema:
             $ref: '#/components/schemas/Problem'
 
+    Forbidden:
+      description: The authenticated user does not have permission.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+
     NotFound:
-      description: The requested record does not exist or is not accessible to the signed-in user.
+      description: The requested record does not exist or is not accessible.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+
+    Conflict:
+      description: The request conflicts with the current resource state.
       content:
         application/problem+json:
           schema:
