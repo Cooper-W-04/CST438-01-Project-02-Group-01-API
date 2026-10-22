@@ -40,7 +40,7 @@ class UserControllerTest {
             oauthProvider = null,
             oauthSubject = null,
             displayName = "Hi",
-            role = "ROLE_USER",
+            role = "USER",
             createdAt = createdAt
         )
 
@@ -56,7 +56,7 @@ class UserControllerTest {
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.displayName").value("Hi"))
-            .andExpect(jsonPath("$.role").value("ROLE_USER"))
+            .andExpect(jsonPath("$.role").value("USER"))
     }
 
     @Test
@@ -67,7 +67,7 @@ class UserControllerTest {
             oauthProvider = null,
             oauthSubject = null,
             displayName = "Hi",
-            role = "ROLE_USER",
+            role = "USER",
             createdAt = createdAt
         )
         val mockUser2 = User(
@@ -75,7 +75,7 @@ class UserControllerTest {
             oauthProvider = null,
             oauthSubject = null,
             displayName = "Hihi",
-            role = "ROLE_USER",
+            role = "USER",
             createdAt = createdAt
         )
         val mockAdmin = User(
@@ -83,7 +83,7 @@ class UserControllerTest {
             oauthProvider = null,
             oauthSubject = null,
             displayName = "Admin",
-            role = "ROLE_ADMIN",
+            role = "ADMIN",
             createdAt = createdAt
         )
 
@@ -103,7 +103,7 @@ class UserControllerTest {
             .andExpect(jsonPath("$[0].id").value(1L))
             .andExpect(jsonPath("$[1].id").value(2L))
             .andExpect(jsonPath("$[2].id").value(3L))
-            .andExpect(jsonPath("$[2].role").value("ROLE_ADMIN"))
+            .andExpect(jsonPath("$[2].role").value("ADMIN"))
     }
 
     @Test
@@ -114,7 +114,7 @@ class UserControllerTest {
             oauthProvider = null,
             oauthSubject = null,
             displayName = "Hi",
-            role = "ROLE_USER",
+            role = "USER",
             createdAt = createdAt
         )
         val mockAdmin = User(
@@ -122,7 +122,7 @@ class UserControllerTest {
             oauthProvider = null,
             oauthSubject = null,
             displayName = "Admin",
-            role = "ROLE_ADMIN",
+            role = "ADMIN",
             createdAt = createdAt
         )
         val testPrincipal = CustomUserDetails(mockAdmin)
