@@ -1,6 +1,5 @@
 package com.scheduler.controller
 
-import com.scheduler.dto.PutGroupRequest
 import com.scheduler.security.CustomUserDetails
 import com.scheduler.model.Group
 import com.scheduler.service.PutRouteService
@@ -20,23 +19,17 @@ class PutRouteController(
     //Do the routing for the two puts 
     
     //replace everything except the stuff done at the start like id, created_at, created_by
-    //And the stuff you're not allowed to touch since it's not yours
     @PutMapping("/api/v1/groups/{groupId}")
     fun replaceGroup(
         @PathVariable groupId: Long,
-        @AuthenticationPrincipal principal: CustomUserDetails,
-        @RequestBody groupRequest: PutGroupRequest,
-    ): ResponseEntity<Void> {
-
-       val checker = putRouteService.replaceGroup(groupId, principal.getId(), groupRequest.groupName, groupRequest.times)
+        @RequestBody group: Group,
+    ){
+       val checker = putRouteService.replaceGroup(groupId, group)
        
        if(checker){
-          return ResponseEntity.noContent().build()
+          
        }else{
-          throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Missing Information"
-            )
+          
        }
     }
     
@@ -45,12 +38,12 @@ class PutRouteController(
     @PutMapping("/api/v1/groups/{groupId}/availability/me")
     fun replaceAvailability(
         @PathVariable groupId: Long,
-        @AuthenticationPrincipal principal: CustomUserDetails,
         @RequestBody times: String,
+        @AuthenticationPrincipal principal: CustomUserDetails
     ): ResponseEntity<Void> {
         //Get user id through getOwnProfile to get the userID
         val userId = principal.getId()
-        val checker = putRouteService.replaceUserAvailability(groupId, userId, times)
+       val checker = putRouteService.replaceUserAvailability(groupId, userId, times)
        
        if(checker){
           return ResponseEntity.noContent().build()

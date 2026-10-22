@@ -3,44 +3,30 @@ package com.scheduler.service
 import com.scheduler.model.Group
 import com.scheduler.model.TimeSlot
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import java.sql.Statement
 
 @Service
 class PutRouteService(
     private val jdbcTemplate: JdbcTemplate
 ) {
-    fun replaceGroup(groupId: Long, userId: Long, groupName: String, times: String): Boolean {
-        //Replace the name with the new given name
-        val groups = jdbcTemplate.update(
-            """
-            UPDATE schedule_groups
-            SET event_name = ?
-            WHERE group_id = ?
-            """.trimIndent(),
-            groupName, groupId
+    fun replaceGroup(groupId: Long, group: Group): Boolean {
+        //Replace the name with the name in the passed group
+        //Replace the groupMembers
+        //Then call replaceGroupAvailability with availabilities
+        
 
-        )
-        
-        if(groups != 1){
-            //Group doesn't exist
-            return false
-        }
-        
-        //Then you can replace your own availability or remove yourself but not remove others
-        try {
-            return replaceUserAvailability(groupId, userId,times)
-        }catch (e: Exception){
-            return false
-        }
+        return true
+    }
+
+    fun replaceGroupAvailability(groupId: Long, timeSlot: TimeSlot): Boolean {
+        //Get all the users from group
+        //Then for each user get the corresponeding information
+        //Pass it to replaceUserAvailability
         
 
         return true
     }
     
-    @Transactional
     fun replaceUserAvailability(groupId: Long, userId: Long, times: String): Boolean {
         val formatTimes = times.split(" ")
         //Check if the times string is good and add them to a list
@@ -57,16 +43,13 @@ class PutRouteService(
                     return false
                 }
                 //check if the day below 0 or above seven
-                if(time[0].digitToInt() !in 1..7){
+                if(time[0].digitToInt() !in 0..7){
                     return false
                 }
                 //check if either of the hours are below 0 or above 24
                 val start = (time[1].toString() + time[2]).toInt()
                 val end = (time[3].toString() + time[4]).toInt()
                 if(start !in 0..24 || end !in 0..24){
-                    return false
-                }
-                if(start >= end){
                     return false
                 }
             }
@@ -92,85 +75,33 @@ class PutRouteService(
         //if they're .equals don't make a new one
         //Using timeSlot make Availability through the passed along group and userID
         for (time in formatTimes){
-            val keyHolder = GeneratedKeyHolder()
-            if(!doesTimeSlotExist((time[1].toString() + time[2]).toInt(),(time[3].toString() + time[4]).toInt(), time[0].digitToInt())){                
-                val timeSlot = TimeSlot(0, time[0].digitToInt(),
+            //Check if it already exists when you have a get going for this
+            val timeSlot = TimeSlot( id = 0, time[0].digitToInt(),
                 (time[1].toString() + time[2]).toInt(), 
-                (time[3].toString() + time[4]).toInt()) 
-                
-                //Insert the new timeSlot
-                jdbcTemplate.update({connection -> connection.prepareStatement(
-                    """
-                    INSERT INTO time_slots(day_of_the_week,start_hour,end_hour)
-                    VALUES(?,?,?)
-                    """.trimIndent(),
-                    Statement.RETURN_GENERATED_KEYS
-                
-                ).apply { 
-                    setInt(1, timeSlot.dayOfWeek)
-                    setInt(2, timeSlot.startHour)
-                    setInt(3, timeSlot.endHour)
-                    }
-                }, keyHolder
-                )
-            }
+                (time[3].toString() + time[4]).toInt())
+            //In the future replace this with whatever thing we have for Post TimeSlot
+            jdbcTemplate.update(
+            """
+            INSERT INTO TIME_SLOT('day_of_the_week','start_hour','end_hour')
+            VALUES(?,?,?)
+            """.trimIndent(),
+            timeSlot.dayOfWeek,
+            timeSlot.startHour,
+            timeSlot.endHour
+            )
             
             
-            //Get the id of the timeslot with a Select
-            val timeId = getTimeSlot((time[1].toString() + time[2]).toInt(), 
-            (time[3].toString() + time[4]).toInt(), time[0].digitToInt())
-            if(timeId == null){
-                return false
-            }
-            
-            //Fix this insert
-            //Insert the new timeSlot
-                jdbcTemplate.update({connection -> connection.prepareStatement(
-                    """
-                    INSERT INTO availability(user_id,group_id,time_slot_id)
-                    VALUES(?,?,?)
-                    """.trimIndent(),
-                    Statement.RETURN_GENERATED_KEYS
-                
-                ).apply { 
-                    setLong(1, userId)
-                    setLong(2, groupId)
-                    setLong(3, timeId)
-                    }
-                }, keyHolder
-                )
+            jdbcTemplate.update(
+            """
+            INSERT INTO AVAILABILITY('user_id','group_id','time_slot_id')
+            VALUES(?,?,?)
+            """.trimIndent(),
+            userId,
+            groupId,
+            timeSlot.id
+            )
         }
 
         return true
-    }
-    
-    fun doesTimeSlotExist(startHour: Int, endHour: Int, day: Int): Boolean{
-        //Put a jbdc retrieve for the time slot
-        return jdbcTemplate.queryForObject(
-            """
-            SELECT EXISTS(
-                SELECT 1
-                FROM time_slots
-                WHERE start_hour = ?
-                AND end_hour = ?
-                AND day_of_the_week = ?
-            )
-            """.trimIndent(), Boolean::class.java,
-            startHour,
-            endHour,day
-        ) ?: false   
-    }
-    
-    fun getTimeSlot(startHour: Int, endHour: Int, day: Int): Long?{
-        return jdbcTemplate.queryForObject(
-            """
-            SELECT id
-            FROM time_slots
-            WHERE start_hour = ?
-            AND end_hour = ?
-            AND day_of_the_week = ?
-            """.trimIndent(), Long::class.java,
-            startHour, 
-            endHour,day)
     }
 }
