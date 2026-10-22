@@ -1,4 +1,10 @@
 package com.scheduler.dto
 
-class GroupDto {
-}
+import java.time.OffsetDateTime
+
+data class GroupDto(
+    val id: Long,
+    val eventName: String,
+    val createdBy: Long,
+    val createdAt: OffsetDateTime
+)

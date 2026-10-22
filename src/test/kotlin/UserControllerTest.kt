@@ -1,4 +1,4 @@
-package com.example
+package com.scheduler
 
 import com.scheduler.controller.UserController
 import com.scheduler.dto.UserDto

@@ -1,7 +1,7 @@
 package com.scheduler.service
 
 import com.scheduler.dto.GroupMembershipResponse
-import com.scheduler.dto.GroupResponse
+import com.scheduler.dto.GroupDto
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Service
@@ -21,7 +21,7 @@ class PostRoutesService(
     fun createGroup(
         eventName: String,
         userId: Long
-    ): GroupResponse {
+    ): GroupDto {
         if (eventName.isBlank()) {
             throw IllegalArgumentException("Event name cannot be blank")
         }
@@ -61,7 +61,7 @@ class PostRoutesService(
             WHERE id = ?
             """.trimIndent(),
             { resultSet, _ ->
-                GroupResponse(
+                GroupDto(
                     id = resultSet.getLong("id"),
                     eventName = resultSet.getString("event_name"),
                     createdBy = resultSet.getLong("created_by"),
