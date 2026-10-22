@@ -1,5 +1,6 @@
-package com.scheduler.controller
+package com.example
 
+import com.scheduler.controller.PutRouteController
 import com.scheduler.dto.PutGroupRequest
 import com.scheduler.security.CustomUserDetails
 import com.scheduler.service.PutRouteService

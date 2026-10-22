@@ -18,7 +18,7 @@ class PutRouteService(
             """
             UPDATE schedule_groups
             SET event_name = ?
-            WHERE group_id = ?
+            WHERE id = ?
             """.trimIndent(),
             groupName, groupId
 
@@ -30,10 +30,10 @@ class PutRouteService(
         }
         
         //Then you can replace your own availability or remove yourself but not remove others
-        try {
-            return replaceUserAvailability(groupId, userId,times)
+        return try {
+            replaceUserAvailability(groupId, userId,times)
         }catch (e: Exception){
-            return false
+            false
         }
         
 
@@ -92,27 +92,8 @@ class PutRouteService(
         //if they're .equals don't make a new one
         //Using timeSlot make Availability through the passed along group and userID
         for (time in formatTimes){
-            val keyHolder = GeneratedKeyHolder()
             if(!doesTimeSlotExist((time[1].toString() + time[2]).toInt(),(time[3].toString() + time[4]).toInt(), time[0].digitToInt())){                
-                val timeSlot = TimeSlot(0, time[0].digitToInt(),
-                (time[1].toString() + time[2]).toInt(), 
-                (time[3].toString() + time[4]).toInt()) 
-                
-                //Insert the new timeSlot
-                jdbcTemplate.update({connection -> connection.prepareStatement(
-                    """
-                    INSERT INTO time_slots(day_of_the_week,start_hour,end_hour)
-                    VALUES(?,?,?)
-                    """.trimIndent(),
-                    Statement.RETURN_GENERATED_KEYS
-                
-                ).apply { 
-                    setInt(1, timeSlot.dayOfWeek)
-                    setInt(2, timeSlot.startHour)
-                    setInt(3, timeSlot.endHour)
-                    }
-                }, keyHolder
-                )
+                return false
             }
             
             
@@ -123,8 +104,9 @@ class PutRouteService(
                 return false
             }
             
+            val keyHolder = GeneratedKeyHolder()
             //Fix this insert
-            //Insert the new timeSlot
+            //Insert the new availability
                 jdbcTemplate.update({connection -> connection.prepareStatement(
                     """
                     INSERT INTO availability(user_id,group_id,time_slot_id)
