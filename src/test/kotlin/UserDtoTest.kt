@@ -1,4 +1,4 @@
-package com.example
+package com.scheduler
 
 import com.scheduler.mapper.UserMapper
 import com.scheduler.model.User

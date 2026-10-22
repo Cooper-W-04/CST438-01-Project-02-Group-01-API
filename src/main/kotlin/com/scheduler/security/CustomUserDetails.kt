@@ -15,7 +15,7 @@ class CustomUserDetails(
 
     override fun getAuthorities(): Collection<out GrantedAuthority> {
         return listOf(
-            SimpleGrantedAuthority("USER_${user.role}")
+            SimpleGrantedAuthority("ROLE_${user.role}")
         )
     }
 

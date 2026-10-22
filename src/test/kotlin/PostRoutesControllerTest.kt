@@ -3,7 +3,7 @@ package com.scheduler
 import com.scheduler.config.SecurityConfig
 import com.scheduler.controller.PostRoutesController
 import com.scheduler.dto.GroupMembershipResponse
-import com.scheduler.dto.GroupResponse
+import com.scheduler.dto.GroupDto
 import com.scheduler.model.User
 import com.scheduler.security.CustomUserDetails
 import com.scheduler.service.PostRoutesService
@@ -34,7 +34,7 @@ class PostRoutesControllerTest {
 
     @Test
     fun `create group route returns the created group`() {
-        val createdGroup = GroupResponse(
+        val createdGroup = GroupDto(
             id = 100L,
             eventName = "Test Event",
             createdBy = 1L,

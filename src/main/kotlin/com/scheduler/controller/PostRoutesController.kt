@@ -2,7 +2,7 @@ package com.scheduler.controller
 
 import com.scheduler.dto.CreateGroupRequest
 import com.scheduler.dto.GroupMembershipResponse
-import com.scheduler.dto.GroupResponse
+import com.scheduler.dto.GroupDto
 import com.scheduler.security.CustomUserDetails
 import com.scheduler.service.AlreadyMemberException
 import com.scheduler.service.GroupNotFoundException
@@ -25,7 +25,7 @@ class PostRoutesController(
     fun createGroup(
         @RequestBody request: CreateGroupRequest,
         @AuthenticationPrincipal principal: CustomUserDetails
-    ): ResponseEntity<GroupResponse> {
+    ): ResponseEntity<GroupDto> {
         return try {
             val group = postRoutesService.createGroup(
                 eventName = request.eventName,

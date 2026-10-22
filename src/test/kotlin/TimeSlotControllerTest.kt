@@ -1,4 +1,4 @@
-package com.example
+package com.scheduler
 
 import com.scheduler.config.SecurityConfig
 import com.scheduler.controller.TimeSlotController
