@@ -5,7 +5,7 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 
-@Table("group_member")
+@Table("group_members")
 data class Member (
     @Id
     val id: Long,

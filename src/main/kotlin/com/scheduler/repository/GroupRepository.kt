@@ -5,9 +5,4 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface GroupRepository : CrudRepository<Group, Long>{
-    fun userIsInGroup(
-        groupId: Long,
-        userId: Long
-    ) : Boolean
-}
+interface GroupRepository : CrudRepository<Group, Long>

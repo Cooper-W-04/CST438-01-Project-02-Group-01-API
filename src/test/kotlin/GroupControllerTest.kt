@@ -128,6 +128,28 @@ class GroupControllerTest {
             .andExpect(jsonPath("$[0].groupId").value(1))
             .andExpect(jsonPath("$[0].userId").value(10))
     }
-    //A test to check that if the user isn't in the group, they can't use these functions would be nice,
-    //but is not currently implemented.
+
+    @Test
+    fun `get group fails when the user is not part of the group`() {
+        `when`(groupSecurity.isMemberOfGroup(1L, 10L))
+            .thenReturn(false)
+
+        mockMvc.perform(
+            authenticatedGet("/api/v1/groups/1")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isForbidden)
+    }
+
+    @Test
+    fun `get group members fails when the user is not part of the group`() {
+        `when`(groupSecurity.isMemberOfGroup(1L, 10L))
+            .thenReturn(false)
+
+        mockMvc.perform(
+            authenticatedGet("/api/v1/groups/1/members")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isForbidden)
+    }
 }
