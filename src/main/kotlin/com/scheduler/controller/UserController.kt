@@ -42,7 +42,7 @@ class UserController(
      * Gets all users, maps userDtos for all users, and returns that response entity.
      */
     @GetMapping("/api/v1/users")
-    @PreAuthorize("hasAuthority('USER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     fun getAllUsers(): ResponseEntity<List<UserDto>> {
         val userDtos = userRepository.findAll()
             .map { userMapper.toDto(it) }
@@ -54,7 +54,7 @@ class UserController(
      * View one user by userID.
      */
     @GetMapping("/api/v1/users/{userId}")
-    @PreAuthorize("hasAuthority('USER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     fun getUserById(
         @PathVariable userId: Long
     ): ResponseEntity<UserDto> {

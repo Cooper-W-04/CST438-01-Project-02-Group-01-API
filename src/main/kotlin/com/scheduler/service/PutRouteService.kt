@@ -12,7 +12,6 @@ import java.sql.Statement
 
 class TimeSlotNotFoundException : RuntimeException()
 class ImproperTimesFormatException : RuntimeException()
-class GroupNotFoundException: RuntimeException()
 
 @Service
 class PutRouteService(

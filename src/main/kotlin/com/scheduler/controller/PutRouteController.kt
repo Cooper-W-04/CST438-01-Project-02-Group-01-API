@@ -25,7 +25,6 @@ class PutRouteController(
     //Do the routing for the two puts 
     
     //replace everything except the stuff done at the start like id, created_at, created_by
-    //And the stuff you're not allowed to touch since it's not yours
     @PutMapping("/api/v1/groups/{groupId}")
     fun replaceGroup(
         @PathVariable groupId: Long,

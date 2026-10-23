@@ -36,6 +36,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
     testImplementation("org.springframework.boot:spring-boot-starter-security-test")
+    testImplementation("org.testcontainers:postgresql:1.20.6")
+    testImplementation("org.testcontainers:junit-jupiter:1.20.6")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
 }
 
 kotlin {
