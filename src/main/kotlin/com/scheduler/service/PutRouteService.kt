@@ -1,33 +1,56 @@
 package com.scheduler.service
 
+import com.scheduler.dto.PutGroupResponse
+import com.scheduler.dto.PutMeResponse
 import com.scheduler.model.Group
 import com.scheduler.model.TimeSlot
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.sql.Statement
+
+class TimeSlotNotFoundException : RuntimeException()
+class ImproperTimesFormatException : RuntimeException()
 
 @Service
 class PutRouteService(
     private val jdbcTemplate: JdbcTemplate
+    
+    
 ) {
-    fun replaceGroup(groupId: Long, group: Group): Boolean {
-        //Replace the name with the name in the passed group
-        //Replace the groupMembers
-        //Then call replaceGroupAvailability with availabilities
+    fun replaceGroup(groupId: Long, userId: Long, groupName: String, times: String): PutGroupResponse {
+        //Replace the name with the new given name
+        val groups = jdbcTemplate.update(
+            """
+            UPDATE schedule_groups
+            SET event_name = ?
+            WHERE id = ?
+            """.trimIndent(),
+            groupName, groupId
+
+        )
         
-
-        return true
-    }
-
-    fun replaceGroupAvailability(groupId: Long, timeSlot: TimeSlot): Boolean {
-        //Get all the users from group
-        //Then for each user get the corresponeding information
-        //Pass it to replaceUserAvailability
+        if(groups != 1){
+            //Group doesn't exist
+            throw GroupNotFoundException()
+        }
         
-
-        return true
+        //Then you can replace your own availability or remove yourself but not remove others
+        return try {
+            PutGroupResponse(groupName, replaceUserAvailability(groupId, userId, times).times)
+        }catch (e: ImproperTimesFormatException){
+            throw ImproperTimesFormatException()
+        }catch (e: TimeSlotNotFoundException){
+            throw ImproperTimesFormatException()
+        }
+        catch (e: Exception){
+            throw ImproperTimesFormatException()
+        }
     }
     
-    fun replaceUserAvailability(groupId: Long, userId: Long, times: String): Boolean {
+    @Transactional
+    fun replaceUserAvailability(groupId: Long, userId: Long, times: String): PutMeResponse {
         val formatTimes = times.split(" ")
         //Check if the times string is good and add them to a list
         //this format
@@ -38,29 +61,33 @@ class PutRouteService(
         //If anything exceeds the constraints 
         //throw a false and stop here before you add or delete anything
         for (time in formatTimes){
-            try {
-                if(time.length != 5){
-                    return false
-                }
-                //check if the day below 0 or above seven
-                if(time[0].digitToInt() !in 0..7){
-                    return false
-                }
-                //check if either of the hours are below 0 or above 24
-                val start = (time[1].toString() + time[2]).toInt()
-                val end = (time[3].toString() + time[4]).toInt()
-                if(start !in 0..24 || end !in 0..24){
-                    return false
-                }
+            if(time.length != 5){
+                throw ImproperTimesFormatException()
             }
-            catch (e: Exception){
-                return false
+            //check if the day below 0 or above seven
+            if(time[0].digitToInt() !in 1..7){
+                throw ImproperTimesFormatException()
             }
+            //check if either of the hours are below 0 or above 24
+            val start = (time[1].toString() + time[2]).toInt()
+            val end = (time[3].toString() + time[4]).toInt()
+            if(start !in 0..23 || end !in 0..24){
+                throw ImproperTimesFormatException()
+            }
+            if(start >= end){
+                throw ImproperTimesFormatException()
+            }
+            //check if the timeslot is the right size
+            if(start != end-1){
+                throw ImproperTimesFormatException()
+            }
+            
+
         }
         
         //Once verified delete all the users availabilities from that group
         //Not TimeSlots since many can share a time slot
-        jdbcTemplate.update(
+        val updated = jdbcTemplate.update(
             """
             DELETE FROM availability
             WHERE group_id = ?
@@ -70,38 +97,48 @@ class PutRouteService(
             userId
         )
         
-        //Add all the needed timeSlots if the needed TimeSlot exists already don't make a copy
-        //Do that by getting all the time slots and converting them to the string format 
-        //if they're .equals don't make a new one
-        //Using timeSlot make Availability through the passed along group and userID
-        for (time in formatTimes){
-            //Check if it already exists when you have a get going for this
-            val timeSlot = TimeSlot( id = 0, time[0].digitToInt(),
-                (time[1].toString() + time[2]).toInt(), 
-                (time[3].toString() + time[4]).toInt())
-            //In the future replace this with whatever thing we have for Post TimeSlot
-            jdbcTemplate.update(
-            """
-            INSERT INTO TIME_SLOT('day_of_the_week','start_hour','end_hour')
-            VALUES(?,?,?)
-            """.trimIndent(),
-            timeSlot.dayOfWeek,
-            timeSlot.startHour,
-            timeSlot.endHour
-            )
+        
+        for (time in formatTimes){            
+            //Get the id of the timeslot with a Select
+            val timeId = getTimeSlot((time[1].toString() + time[2]).toInt(), 
+            (time[3].toString() + time[4]).toInt(), time[0].digitToInt())
+            //If the timeSlot doesn't exist complain
+            if(timeId == null){
+                throw TimeSlotNotFoundException()
+            }
             
+            val keyHolder = GeneratedKeyHolder()
+            //Fix this insert
+            //Insert the new availability
+            jdbcTemplate.update({connection -> connection.prepareStatement(
+                """
+                INSERT INTO availability(user_id,group_id,time_slot_id)
+                VALUES(?,?,?)
+                """.trimIndent(),
+                Statement.RETURN_GENERATED_KEYS
             
-            jdbcTemplate.update(
-            """
-            INSERT INTO AVAILABILITY('user_id','group_id','time_slot_id')
-            VALUES(?,?,?)
-            """.trimIndent(),
-            userId,
-            groupId,
-            timeSlot.id
+            ).apply { 
+                setLong(1, userId)
+                setLong(2, groupId)
+                setLong(3, timeId)
+                }
+            }, keyHolder
             )
         }
 
-        return true
+        return PutMeResponse(times)
+    }
+    
+    fun getTimeSlot(startHour: Int, endHour: Int, day: Int): Long?{
+        return jdbcTemplate.queryForObject(
+            """
+            SELECT id
+            FROM time_slots
+            WHERE start_hour = ?
+            AND end_hour = ?
+            AND day_of_the_week = ?
+            """.trimIndent(), Long::class.java,
+            startHour, 
+            endHour,day)
     }
 }

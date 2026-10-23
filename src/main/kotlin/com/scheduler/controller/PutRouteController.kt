@@ -1,8 +1,14 @@
 package com.scheduler.controller
 
+import com.scheduler.dto.PutGroupRequest
+import com.scheduler.dto.PutGroupResponse
+import com.scheduler.dto.PutMeResponse
 import com.scheduler.security.CustomUserDetails
 import com.scheduler.model.Group
+import com.scheduler.service.GroupNotFoundException
+import com.scheduler.service.ImproperTimesFormatException
 import com.scheduler.service.PutRouteService
+import com.scheduler.service.TimeSlotNotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -22,14 +28,30 @@ class PutRouteController(
     @PutMapping("/api/v1/groups/{groupId}")
     fun replaceGroup(
         @PathVariable groupId: Long,
-        @RequestBody group: Group,
-    ){
-       val checker = putRouteService.replaceGroup(groupId, group)
+        @AuthenticationPrincipal principal: CustomUserDetails,
+        @RequestBody groupRequest: PutGroupRequest,
+    ): ResponseEntity<PutGroupResponse> {
        
-       if(checker){
-          
-       }else{
-          
+       return try {  
+           ResponseEntity.status(HttpStatus.CREATED).body(putRouteService.replaceGroup(groupId, principal.getId(), groupRequest.groupName, groupRequest.times))
+       }
+       catch (e: ImproperTimesFormatException){
+          throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Improper Format of Times"
+            )
+       }
+       catch (e: TimeSlotNotFoundException){
+          throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Time Slot Not Found"
+            )
+       }
+       catch (e: GroupNotFoundException){
+          throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Group Doesn't Exist"
+            )
        }
     }
     
@@ -38,19 +60,24 @@ class PutRouteController(
     @PutMapping("/api/v1/groups/{groupId}/availability/me")
     fun replaceAvailability(
         @PathVariable groupId: Long,
+        @AuthenticationPrincipal principal: CustomUserDetails,
         @RequestBody times: String,
-        @AuthenticationPrincipal principal: CustomUserDetails
-    ): ResponseEntity<Void> {
+    ): ResponseEntity<PutMeResponse> {
         //Get user id through getOwnProfile to get the userID
         val userId = principal.getId()
-       val checker = putRouteService.replaceUserAvailability(groupId, userId, times)
        
-       if(checker){
-          return ResponseEntity.noContent().build()
-       }else{
+       return try {
+           ResponseEntity.status(HttpStatus.CREATED).body(putRouteService.replaceUserAvailability(groupId, userId, times))
+       }catch (e: ImproperTimesFormatException){
           throw ResponseStatusException(
-                HttpStatus.EXPECTATION_FAILED,
-                "Improper Formatting of Time Information"
+                HttpStatus.BAD_REQUEST,
+                "Improper Format of Times"
+            )
+       }
+       catch (e: TimeSlotNotFoundException){
+          throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Time Slot Not Found"
             )
        }
     }
