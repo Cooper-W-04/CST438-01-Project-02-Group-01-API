@@ -1,5 +1,7 @@
 package com.scheduler.service
 
+import com.scheduler.dto.PutGroupResponse
+import com.scheduler.dto.PutMeResponse
 import com.scheduler.model.Group
 import com.scheduler.model.TimeSlot
 import org.springframework.jdbc.core.JdbcTemplate
@@ -18,7 +20,7 @@ class PutRouteService(
     
     
 ) {
-    fun replaceGroup(groupId: Long, userId: Long, groupName: String, times: String): Boolean {
+    fun replaceGroup(groupId: Long, userId: Long, groupName: String, times: String): PutGroupResponse {
         //Replace the name with the new given name
         val groups = jdbcTemplate.update(
             """
@@ -37,22 +39,19 @@ class PutRouteService(
         
         //Then you can replace your own availability or remove yourself but not remove others
         return try {
-            replaceUserAvailability(groupId, userId,times)
+            PutGroupResponse(groupName, replaceUserAvailability(groupId, userId, times).times)
         }catch (e: ImproperTimesFormatException){
-            false
+            throw ImproperTimesFormatException()
         }catch (e: TimeSlotNotFoundException){
-            false
+            throw ImproperTimesFormatException()
         }
         catch (e: Exception){
-            false
+            throw ImproperTimesFormatException()
         }
-        
-
-        return true
     }
     
     @Transactional
-    fun replaceUserAvailability(groupId: Long, userId: Long, times: String): Boolean {
+    fun replaceUserAvailability(groupId: Long, userId: Long, times: String): PutMeResponse {
         val formatTimes = times.split(" ")
         //Check if the times string is good and add them to a list
         //this format
@@ -128,7 +127,7 @@ class PutRouteService(
             )
         }
 
-        return true
+        return PutMeResponse(times)
     }
     
     fun getTimeSlot(startHour: Int, endHour: Int, day: Int): Long?{
