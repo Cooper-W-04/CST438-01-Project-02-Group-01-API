@@ -21,7 +21,11 @@ class SecurityConfig {
                 it.requestMatchers(
                     HttpMethod.GET,
                     "/api/v1/time-slots",
-                    "/api/v1/time-slots/**"
+                    "/api/v1/time-slots/**",
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/v3/api-docs.yaml"
                 ).permitAll()
 
                 it.anyRequest().authenticated()
