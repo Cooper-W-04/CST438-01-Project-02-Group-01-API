@@ -94,6 +94,8 @@ class PutRouteControllerTest {
             controller.replaceGroup(7L, principal, PutGroupRequest("Team", "10912"))
         }
         
+        assertEquals(HttpStatus.FORBIDDEN, exception.statusCode)
+    }
     @Test
     fun `replaceAvailability returns no content when availability is replaced`() {
         `when`(principal.getId()).thenReturn(42L)
@@ -133,4 +135,4 @@ class PutRouteControllerTest {
         assertEquals("Time Slot Not Found", exception.reason)
     }
 }
-}
+

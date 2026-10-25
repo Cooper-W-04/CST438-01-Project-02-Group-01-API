@@ -22,14 +22,15 @@ class PutRouteService(
 ) {
     @Transactional
     fun replaceGroup(groupId: Long, userId: Long, groupName: String, times: String): PutGroupResponse {
-        //Replace the name with the new given name
-        val groups = jdbcTemplate.update(
+        //checks if the group exists
+        val groups = jdbcTemplate.queryForObject(
             """
-            UPDATE schedule_groups
-            SET event_name = ?
+            SELECT COUNT(*)
+            FROM schedule_groups
             WHERE id = ?
             """.trimIndent(),
-            groupName, groupId, userId
+            Int::class.java,
+            groupId,
 
         )
         

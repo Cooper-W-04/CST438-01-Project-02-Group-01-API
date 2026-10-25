@@ -81,13 +81,38 @@ class PutRouteServiceTest {
             service.replaceGroup(1L, 2L, "Team", "10910")
         }
     }
+    
+    @Test
+    fun `getTimeSlot returns null when time slot doesn't exist'`() {
+        
+        val id = service.getTimeSlot(-1, 0, 0)
+        
+        assertEquals(null, id)
+    }
 
     @Test
     fun `replaceGroup converts availability errors to invalid times`() {
-        `when`(jdbc.update(anyString(), eq("Team"), eq(1L))).thenReturn(1)
+        `when`(
+            jdbc.queryForObject(
+                anyString(),
+                eq(Int::class.java),
+                eq(1L)
+            )
+        ).thenReturn(1)
+
+        `when`(
+            jdbc.update(
+                anyString(),
+                eq("Team"),
+                eq(1L),
+                eq(2L)
+            )
+        ).thenReturn(1)
 
         assertThrows<ImproperTimesFormatException> {
             service.replaceGroup(1L, 2L, "Team", "bad")
         }
     }
+    
+    
 }
