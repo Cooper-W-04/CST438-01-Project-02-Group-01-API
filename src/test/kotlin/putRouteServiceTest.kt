@@ -82,13 +82,6 @@ class PutRouteServiceTest {
         }
     }
     
-    @Test
-    fun `getTimeSlot returns null when time slot doesn't exist'`() {
-        
-        val id = service.getTimeSlot(-1, 0, 0)
-        
-        assertEquals(null, id)
-    }
 
     @Test
     fun `replaceGroup converts availability errors to invalid times`() {

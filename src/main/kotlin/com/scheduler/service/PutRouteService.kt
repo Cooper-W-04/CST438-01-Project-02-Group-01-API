@@ -4,6 +4,7 @@ import com.scheduler.dto.PutGroupResponse
 import com.scheduler.dto.PutMeResponse
 import com.scheduler.model.Group
 import com.scheduler.model.TimeSlot
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Service
@@ -63,9 +64,6 @@ class PutRouteService(
         }catch (e: TimeSlotNotFoundException){
             throw TimeSlotNotFoundException()
         }
-        catch (e: Exception){
-            throw ImproperTimesFormatException()
-        }
     }
     
     @Transactional
@@ -106,12 +104,16 @@ class PutRouteService(
                 throw ImproperTimesFormatException()
             }   
             //Added time slot verification before deletion
-            val timeId = getTimeSlot((time[1].toString() + time[2]).toInt(), 
+            try {
+                val timeId = getTimeSlot((time[1].toString() + time[2]).toInt(), 
             (time[3].toString() + time[4]).toInt(), time[0].digitToInt())
-            //If the timeSlot doesn't exist complain
-            if(timeId == null){
+                if(timeId == null){
+                    throw TimeSlotNotFoundException()
+                }
+            }catch (e: EmptyResultDataAccessException){
                 throw TimeSlotNotFoundException()
             }
+
         }
         
         //Once verified delete all the users availabilities from that group
@@ -128,10 +130,9 @@ class PutRouteService(
         
         
         for (time in formatTimes){            
-            //Get the id of the timeslot with a Select
+            //Already checked timeID above so no need to check again since nothing alters any of the parameters
             val timeId = getTimeSlot((time[1].toString() + time[2]).toInt(), 
             (time[3].toString() + time[4]).toInt(), time[0].digitToInt())
-            //If the timeSlot doesn't exist complain
             if(timeId == null){
                 throw TimeSlotNotFoundException()
             }
