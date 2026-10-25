@@ -5,6 +5,7 @@ import com.scheduler.dto.PutGroupResponse
 import com.scheduler.dto.PutMeResponse
 import com.scheduler.security.CustomUserDetails
 import com.scheduler.model.Group
+import com.scheduler.service.ForbiddenUserException
 import com.scheduler.service.GroupNotFoundException
 import com.scheduler.service.ImproperTimesFormatException
 import com.scheduler.service.PutRouteService
@@ -30,27 +31,34 @@ class PutRouteController(
         @PathVariable groupId: Long,
         @AuthenticationPrincipal principal: CustomUserDetails,
         @RequestBody groupRequest: PutGroupRequest,
-    ): ResponseEntity<PutGroupResponse> {
+    ): ResponseEntity<Void> {
        
-       return try {  
-           ResponseEntity.status(HttpStatus.CREATED).body(putRouteService.replaceGroup(groupId, principal.getId(), groupRequest.groupName, groupRequest.times))
+       return try {
+           putRouteService.replaceGroup(groupId, principal.getId(), groupRequest.groupName, groupRequest.times)
+           ResponseEntity.noContent().build()
        }
        catch (e: ImproperTimesFormatException){
           throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.EXPECTATION_FAILED,
                 "Improper Format of Times"
             )
        }
        catch (e: TimeSlotNotFoundException){
           throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.NOT_FOUND,
                 "Time Slot Not Found"
             )
        }
        catch (e: GroupNotFoundException){
           throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.NOT_FOUND,
                 "Group Doesn't Exist"
+            )
+       }
+       catch (e: ForbiddenUserException){
+          throw ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "Group created by other not allowed to edit"
             )
        }
     }
@@ -62,21 +70,24 @@ class PutRouteController(
         @PathVariable groupId: Long,
         @AuthenticationPrincipal principal: CustomUserDetails,
         @RequestBody times: String,
-    ): ResponseEntity<PutMeResponse> {
+    ): ResponseEntity<Void> {
         //Get user id through getOwnProfile to get the userID
         val userId = principal.getId()
        
        return try {
-           ResponseEntity.status(HttpStatus.CREATED).body(putRouteService.replaceUserAvailability(groupId, userId, times))
+           putRouteService.replaceUserAvailability(groupId, userId, times)
+           ResponseEntity.noContent().build()
+           
+        //    ResponseEntity.status(HttpStatus.CREATED).body(putRouteService.replaceUserAvailability(groupId, userId, times))
        }catch (e: ImproperTimesFormatException){
           throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.EXPECTATION_FAILED,
                 "Improper Format of Times"
             )
        }
        catch (e: TimeSlotNotFoundException){
           throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.NOT_FOUND,
                 "Time Slot Not Found"
             )
        }

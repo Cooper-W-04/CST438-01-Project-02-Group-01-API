@@ -12,6 +12,7 @@ import java.sql.Statement
 
 class TimeSlotNotFoundException : RuntimeException()
 class ImproperTimesFormatException : RuntimeException()
+class ForbiddenUserException: RuntimeException()
 
 @Service
 class PutRouteService(
@@ -19,6 +20,7 @@ class PutRouteService(
     
     
 ) {
+    @Transactional
     fun replaceGroup(groupId: Long, userId: Long, groupName: String, times: String): PutGroupResponse {
         //Replace the name with the new given name
         val groups = jdbcTemplate.update(
@@ -27,7 +29,7 @@ class PutRouteService(
             SET event_name = ?
             WHERE id = ?
             """.trimIndent(),
-            groupName, groupId
+            groupName, groupId, userId
 
         )
         
@@ -36,13 +38,29 @@ class PutRouteService(
             throw GroupNotFoundException()
         }
         
+        val groupsCheck = jdbcTemplate.update(
+            """
+            UPDATE schedule_groups
+            SET event_name = ?
+            WHERE id = ?
+            AND created_by = ?
+            """.trimIndent(),
+            groupName, groupId, userId
+
+        )
+        
+        if(groupsCheck != 1){
+            //Group isn't yours
+            throw ForbiddenUserException()
+        }
+        
         //Then you can replace your own availability or remove yourself but not remove others
         return try {
             PutGroupResponse(groupName, replaceUserAvailability(groupId, userId, times).times)
         }catch (e: ImproperTimesFormatException){
             throw ImproperTimesFormatException()
         }catch (e: TimeSlotNotFoundException){
-            throw ImproperTimesFormatException()
+            throw TimeSlotNotFoundException()
         }
         catch (e: Exception){
             throw ImproperTimesFormatException()
@@ -64,8 +82,13 @@ class PutRouteService(
             if(time.length != 5){
                 throw ImproperTimesFormatException()
             }
-            //check if the day below 0 or above seven
-            if(time[0].digitToInt() !in 1..7){
+            try {
+             //check if the day below 0 or above seven
+                if(time[0].digitToInt() !in 1..7){
+                    throw ImproperTimesFormatException()
+                }
+            //If this is non numeric catches it and throws back the error
+            }catch (e: Exception){
                 throw ImproperTimesFormatException()
             }
             //check if either of the hours are below 0 or above 24
@@ -80,9 +103,14 @@ class PutRouteService(
             //check if the timeslot is the right size
             if(start != end-1){
                 throw ImproperTimesFormatException()
+            }   
+            //Added time slot verification before deletion
+            val timeId = getTimeSlot((time[1].toString() + time[2]).toInt(), 
+            (time[3].toString() + time[4]).toInt(), time[0].digitToInt())
+            //If the timeSlot doesn't exist complain
+            if(timeId == null){
+                throw TimeSlotNotFoundException()
             }
-            
-
         }
         
         //Once verified delete all the users availabilities from that group

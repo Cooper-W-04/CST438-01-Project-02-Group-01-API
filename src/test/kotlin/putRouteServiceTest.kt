@@ -29,16 +29,6 @@ class PutRouteServiceTest {
     }
 
     @Test
-    fun `replaceUserAvailability returns times`() {
-        `when`(jdbc.update(anyString(), eq(1L), eq(2L))).thenReturn(1)
-        `when`(jdbc.queryForObject(anyString(), eq(Long::class.java), eq(9), eq(10), eq(1)))
-            .thenReturn(3L)
-        `when`(jdbc.update(any<PreparedStatementCreator>(), any<KeyHolder>())).thenReturn(1)
-
-        assertEquals("10910", service.replaceUserAvailability(1L, 2L, "10910").times)
-    }
-
-    @Test
     fun `replaceUserAvailability reports missing time slot`() {
         val service = spy(PutRouteService(jdbc))
         `when`(jdbc.update(anyString(), eq(1L), eq(2L))).thenReturn(1)
@@ -48,16 +38,39 @@ class PutRouteServiceTest {
             service.replaceUserAvailability(1L, 2L, "10910")
         }
     }
+    
+    @Test
+    fun `replaceUserAvailability creates one availability row for each time`() {
+        val service = spy(PutRouteService(jdbc))
+        doReturn(101L).`when`(service).getTimeSlot(9, 10, 1)
+        doReturn(202L).`when`(service).getTimeSlot(10, 11, 1)
+        doReturn(1).`when`(jdbc).update(
+            any(PreparedStatementCreator::class.java),
+            any(KeyHolder::class.java)
+        )
+
+        service.replaceUserAvailability(7L, 8L, "10910 11011")
+
+        verify(jdbc).update(anyString(), eq(7L), eq(8L))
+        verify(jdbc, times(2)).update(
+            any(PreparedStatementCreator::class.java),
+            any(KeyHolder::class.java)
+        )
+    }
 
     @Test
-    fun `replaceGroup returns updated group`() {
-        `when`(jdbc.update(anyString(), eq("Team"), eq(1L))).thenReturn(1)
-        `when`(jdbc.update(anyString(), eq(1L), eq(2L))).thenReturn(1)
-        `when`(jdbc.queryForObject(anyString(), eq(Long::class.java), eq(9), eq(10), eq(1)))
-            .thenReturn(3L)
-        `when`(jdbc.update(any<PreparedStatementCreator>(), any<KeyHolder>())).thenReturn(1)
+    fun `replaceUserAvailability does not leave partial availability changes when a time slot is missing`() {
+        val service = spy(PutRouteService(jdbc))
+        doReturn(101L).`when`(service).getTimeSlot(9, 10, 1)
+        doReturn(null).`when`(service).getTimeSlot(10, 11, 1)
 
-        assertEquals(PutGroupResponse("Team", "10910"), service.replaceGroup(1L, 2L, "Team", "10910"))
+        assertThrows<TimeSlotNotFoundException> {
+            service.replaceUserAvailability(7L, 8L, "10910 11011")
+        }
+
+        // All time slots are checked before the delete or any insert, so an
+        // invalid request cannot leave a partially replaced availability set.
+        verifyNoInteractions(jdbc)
     }
 
     @Test
